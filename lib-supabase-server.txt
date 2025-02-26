@@ -1,0 +1,48 @@
+import { cookies } from 'next/headers'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+
+export const createServerSupabaseClient = () =>
+  createServerComponentClient({ cookies })
+
+export async function getServerSession() {
+  const supabase = createServerSupabaseClient()
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    return session
+  } catch (error) {
+    console.error('Error getting session:', error)
+    return null
+  }
+}
+
+export async function getUser() {
+  const supabase = createServerSupabaseClient()
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    return user
+  } catch (error) {
+    console.error('Error getting user:', error)
+    return null
+  }
+}
+
+export async function getUserProfile() {
+  const user = await getUser()
+  if (!user) return null
+  
+  const supabase = createServerSupabaseClient()
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  if (error) {
+    console.error('Error getting user profile:', error)
+    return null
+  }
+
+  return data
+}

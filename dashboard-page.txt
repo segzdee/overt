@@ -1,0 +1,185 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useRouter } from "next/navigation"
+import { Card, CardContent, Typography, Grid, Paper, Box, CircularProgress } from "@mui/material"
+import { AgencySpecificDashboard } from "@/components/AgencySpecificDashboard"
+
+export default function DashboardPage() {
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState({
+    activeShifts: 0,
+    pendingApplications: 0,
+    totalEarnings: 0,
+    completedShifts: 0,
+  })
+  
+  const router = useRouter()
+  const supabase = createClientComponentClient()
+
+  useEffect(() => {
+    async function fetchUserAndStats() {
+      setIsLoading(true)
+      
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        router.push('/login')
+        return
+      }
+      
+      // Get profile and role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+      
+      if (profile) {
+        setUserRole(profile.role)
+        
+        // Redirect to role-specific dashboard if needed
+        if (profile.role === 'admin') {
+          router.push('/dashboard/admin')
+          return
+        }
+      }
+      
+      // Fetch sample statistics - in production, this would hit real endpoints
+      // This is just placeholder data
+      setStats({
+        activeShifts: Math.floor(Math.random() * 10),
+        pendingApplications: Math.floor(Math.random() * 5),
+        totalEarnings: Math.floor(Math.random() * 10000),
+        completedShifts: Math.floor(Math.random() * 50),
+      })
+      
+      setIsLoading(false)
+    }
+    
+    fetchUserAndStats()
+  }, [router, supabase])
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  return (
+    <div>
+      <Typography variant="h4" gutterBottom>
+        Dashboard
+      </Typography>
+      
+      {/* Stats Overview */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
+            <Typography color="textSecondary" gutterBottom variant="subtitle2">
+              ACTIVE SHIFTS
+            </Typography>
+            <Typography component="p" variant="h4">
+              {stats.activeShifts}
+            </Typography>
+            <Typography color="textSecondary" sx={{ flex: 1, fontSize: '12px', mt: 1 }}>
+              Currently scheduled shifts
+            </Typography>
+          </Paper>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
+            <Typography color="textSecondary" gutterBottom variant="subtitle2">
+              {userRole === 'staff' ? 'PENDING APPLICATIONS' : 'OPEN POSITIONS'}
+            </Typography>
+            <Typography component="p" variant="h4">
+              {stats.pendingApplications}
+            </Typography>
+            <Typography color="textSecondary" sx={{ flex: 1, fontSize: '12px', mt: 1 }}>
+              {userRole === 'staff' ? 'Awaiting response' : 'Positions to fill'}
+            </Typography>
+          </Paper>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
+            <Typography color="textSecondary" gutterBottom variant="subtitle2">
+              {userRole === 'staff' ? 'TOTAL EARNINGS' : 'TOTAL BILLINGS'}
+            </Typography>
+            <Typography component="p" variant="h4">
+              ${stats.totalEarnings.toLocaleString()}
+            </Typography>
+            <Typography color="textSecondary" sx={{ flex: 1, fontSize: '12px', mt: 1 }}>
+              {userRole === 'staff' ? 'Your earnings to date' : 'Current billing period'}
+            </Typography>
+          </Paper>
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={2} sx={{ p: 2, display: 'flex', flexDirection: 'column', height: 140 }}>
+            <Typography color="textSecondary" gutterBottom variant="subtitle2">
+              COMPLETED SHIFTS
+            </Typography>
+            <Typography component="p" variant="h4">
+              {stats.completedShifts}
+            </Typography>
+            <Typography color="textSecondary" sx={{ flex: 1, fontSize: '12px', mt: 1 }}>
+              All time total
+            </Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+      
+      {/* Role-specific dashboard content */}
+      {userRole === 'agency' && (
+        <AgencySpecificDashboard />
+      )}
+      
+      {userRole === 'business' && (
+        <Card sx={{ mb: 4 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Recent Job Postings
+            </Typography>
+            {/* Replace with actual job listings component */}
+            <Typography>
+              Your recent job postings will appear here.
+            </Typography>
+          </CardContent>
+        </Card>
+      )}
+      
+      {userRole === 'staff' && (
+        <Card sx={{ mb: 4 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Available Shifts
+            </Typography>
+            {/* Replace with actual shifts component */}
+            <Typography>
+              Available shifts matching your profile will appear here.
+            </Typography>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Market Updates */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            Market Updates
+          </Typography>
+          <Typography>
+            Real-time updates from the hospitality staffing market will appear here.
+          </Typography>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

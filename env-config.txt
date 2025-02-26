@@ -1,0 +1,15 @@
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# Website Configuration
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Security 
+ALLOWED_ORIGINS=http://localhost:3000,https://overtimestaff.com
+
+# Sentry Configuration (Error Tracking)
+NEXT_PUBLIC_SENTRY_DSN=your-sentry-dsn
+
+# Database Connection (Prisma)
+DATABASE_URL="postgresql://username:password@localhost:5432/overtimestaff?schema=public"

@@ -1,0 +1,44 @@
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+// Routes that don't require authentication
+const publicRoutes = ['/', '/login', '/register', '/about', '/contact', '/find-shifts', '/find-staff', '/agencies']
+
+// Routes that should redirect to dashboard if user is already authenticated
+const authRoutes = ['/login', '/register']
+
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next()
+  const supabase = createMiddlewareClient({ req, res })
+  
+  // Check if the user is authenticated
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  
+  const url = req.nextUrl.clone()
+  const { pathname } = req.nextUrl
+  
+  // If user is on an auth route and is already authenticated, redirect to dashboard
+  if (session && authRoutes.includes(pathname)) {
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
+  
+  // Check if route requires authentication
+  const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith(`${route}/`))
+  
+  // If authentication is required but user isn't authenticated, redirect to login
+  if (!session && !isPublicRoute && !pathname.startsWith('/_next') && !pathname.startsWith('/api')) {
+    url.pathname = '/login'
+    url.searchParams.set('redirect', pathname)
+    return NextResponse.redirect(url)
+  }
+  
+  return res
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+}

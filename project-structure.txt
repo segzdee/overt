@@ -1,0 +1,96 @@
+# OvertimeStaff Platform - Project Analysis
+
+## Overview
+OvertimeStaff is a hospitality staffing platform that connects:
+- Staffing agencies
+- Hotels and businesses
+- Shift workers
+- AI Agents (for automation)
+
+## File Structure and Organization
+
+### Current Structure
+The codebase contains various components, utilities, and configuration files, but lacks proper organization. Key issues include:
+
+1. **Inconsistent folder structure**
+   - Missing proper app routing with Next.js 14 conventions
+   - Components spread across multiple locations
+   - Utility functions split between `/lib` and `/utils`
+
+2. **Database configuration**
+   - Supabase database setup files exist but implementation is incomplete
+   - SQL migration files need proper placement
+
+3. **Component organization**
+   - Multiple dashboard components need proper routing and connections
+   - Authentication flow needs proper setup
+
+4. **Missing critical files**
+   - Some referenced components are missing
+   - Environment configuration needs setup
+
+## Recommended File Structure
+
+```
+/app
+  /api                    # API routes
+  /auth                   # Authentication pages
+  /dashboard              # Dashboard routes
+    /agency               # Agency dashboard
+    /business             # Business dashboard
+    /staff                # Staff dashboard
+    /platform-admin       # Admin dashboard
+  /login                  # Login page
+  /register               # Registration page
+  layout.tsx              # Root layout
+  page.tsx                # Homepage
+/components               # Shared components
+  /ui                     # UI components (from shadcn)
+  /dashboard              # Dashboard specific components
+  /forms                  # Form components
+  /market                 # Market data components
+/lib                      # Shared utilities
+  /supabase               # Supabase client
+  /hooks                  # Custom hooks
+  /store                  # Zustand stores
+/public                   # Static assets
+/types                    # TypeScript types
+/prisma                   # Prisma schema (if used)
+```
+
+## Missing Critical Files
+
+1. **Environment Setup**
+   - `.env.local` should contain Supabase credentials
+
+2. **Component Implementation**
+   - Several UI components referenced but not implemented
+   - Market data visualization components need completion
+
+3. **Authentication Flow**
+   - Complete sign-up and sign-in process
+   - Role-based authorization
+
+4. **API Routes**
+   - Endpoints for dashboard data
+   - Authentication handlers
+   - Shift management endpoints
+
+## Integration Issues
+
+1. **Multiple UI Libraries**
+   - Both Material UI and Tailwind/shadcn components are used
+   - Need consistent styling approach
+
+2. **State Management**
+   - Multiple approaches (React Query, Zustand)
+   - Need consistent data-fetching strategy
+
+## Next Steps for Completion
+
+1. Reorganize files into proper Next.js app directory structure
+2. Complete authentication flow with Supabase
+3. Implement dashboard views for each user role
+4. Set up proper API routes for data fetching
+5. Create consistent styling system
+6. Implement market update and shift management features

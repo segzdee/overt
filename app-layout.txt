@@ -1,0 +1,31 @@
+import { Inter } from "next/font/google"
+import type { Metadata } from "next"
+import type React from "react"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
+import "@/styles/globals.css"
+
+const inter = Inter({ subsets: ["latin"] })
+
+export const metadata: Metadata = {
+  title: "OvertimeStaff Platform",
+  description: "AI-driven solutions for connecting agencies, hotels, and businesses with extra staff",
+  generator: 'OvertimeStaff v1.0'
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </body>
+    </html>
+  )
+}

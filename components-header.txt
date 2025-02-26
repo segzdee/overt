@@ -1,0 +1,145 @@
+"use client"
+
+import { useState } from 'react'
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { Menu, X } from "lucide-react"
+
+const Header = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const supabase = createClientComponentClient()
+  const [user, setUser] = useState<any>(null)
+
+  // Check if user is logged in
+  useState(() => {
+    async function checkUser() {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    checkUser()
+  })
+
+  return (
+    <header className="bg-white shadow-sm">
+      <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <Link href="/" className="text-2xl font-bold text-purple-600">
+          OVERTIMESTAFF
+        </Link>
+
+        {/* Mobile menu button */}
+        <div className="lg:hidden">
+          <button
+            type="button"
+            className="p-2 text-gray-600"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
+          </button>
+        </div>
+
+        {/* Desktop Navigation */}
+        <div className="hidden lg:flex lg:items-center lg:space-x-6">
+          <Link href="/find-shifts" className="text-gray-600 hover:text-purple-600 font-medium">
+            Find Shifts
+          </Link>
+          <Link href="/find-staff" className="text-gray-600 hover:text-purple-600 font-medium">
+            Find Staff
+          </Link>
+          <Link href="/agencies" className="text-gray-600 hover:text-purple-600 font-medium">
+            Agencies
+          </Link>
+          <Link href="/about" className="text-gray-600 hover:text-purple-600 font-medium">
+            About
+          </Link>
+          
+          {user ? (
+            <div className="flex items-center space-x-4">
+              <Link href="/dashboard">
+                <Button variant="outline">Dashboard</Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <Link href="/login">
+                <Button variant="outline">Log in</Button>
+              </Link>
+              <Link href="/register">
+                <Button className="bg-purple-600 hover:bg-purple-700">Sign up</Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden">
+          <div className="bg-white px-4 pt-2 pb-4 space-y-4">
+            <Link 
+              href="/find-shifts" 
+              className="block py-2 text-gray-600 hover:text-purple-600 font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Find Shifts
+            </Link>
+            <Link 
+              href="/find-staff" 
+              className="block py-2 text-gray-600 hover:text-purple-600 font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Find Staff
+            </Link>
+            <Link 
+              href="/agencies" 
+              className="block py-2 text-gray-600 hover:text-purple-600 font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Agencies
+            </Link>
+            <Link 
+              href="/about" 
+              className="block py-2 text-gray-600 hover:text-purple-600 font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              About
+            </Link>
+            
+            {user ? (
+              <Link 
+                href="/dashboard" 
+                className="block py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Button className="w-full">Dashboard</Button>
+              </Link>
+            ) : (
+              <div className="space-y-2">
+                <Link 
+                  href="/login" 
+                  className="block py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Button variant="outline" className="w-full">Log in</Button>
+                </Link>
+                <Link 
+                  href="/register" 
+                  className="block py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Button className="w-full bg-purple-600 hover:bg-purple-700">Sign up</Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+  )
+}
+
+export default Header
