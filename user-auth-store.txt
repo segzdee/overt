@@ -1,0 +1,208 @@
+import { create } from "zustand"
+import { persist, createJSONStorage } from "zustand/middleware"
+import { supabase, getCurrentUser, getUserProfile } from "@/lib/supabase/client"
+
+// User role type
+export type UserRole = "admin" | "agency" | "business" | "staff" | null
+
+// User profile interface
+export interface UserProfile {
+  id: string
+  username?: string
+  full_name?: string
+  avatar_url?: string
+  website?: string
+  role: UserRole
+  updated_at?: string
+}
+
+// Authentication state interface
+interface AuthState {
+  // State
+  user: UserProfile | null
+  isLoading: boolean
+  error: string | null
+  
+  // Actions
+  login: (email: string, password: string) => Promise<void>
+  register: (email: string, password: string, userData: Partial<UserProfile>) => Promise<void>
+  logout: () => Promise<void>
+  updateProfile: (data: Partial<UserProfile>) => Promise<void>
+  refreshUser: () => Promise<void>
+  
+  // Setters
+  setUser: (user: UserProfile | null) => void
+  setError: (error: string | null) => void
+  setLoading: (isLoading: boolean) => void
+  clearError: () => void
+}
+
+/**
+ * Main authentication store using Zustand with persistence
+ */
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      // Initial state
+      user: null,
+      isLoading: false,
+      error: null,
+      
+      // Setters
+      setUser: (user) => set({ user }),
+      setError: (error) => set({ error }),
+      setLoading: (isLoading) => set({ isLoading }),
+      clearError: () => set({ error: null }),
+      
+      // Login action
+      login: async (email, password) => {
+        try {
+          set({ isLoading: true, error: null })
+          
+          // Sign in with Supabase
+          const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+          
+          if (error) throw error
+          
+          // Get user profile after login
+          await get().refreshUser()
+        } catch (error) {
+          console.error("Login error:", error)
+          set({ 
+            error: error.message || "Failed to sign in. Please check your credentials.",
+            user: null,
+            isLoading: false 
+          })
+        }
+      },
+      
+      // Register action
+      register: async (email, password, userData) => {
+        try {
+          set({ isLoading: true, error: null })
+          
+          // Create new user with Supabase
+          const { error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                full_name: userData.full_name,
+                role: userData.role,
+                avatar_url: userData.avatar_url,
+              },
+            },
+          })
+          
+          if (error) throw error
+          
+          // Get user profile after registration
+          await get().refreshUser()
+        } catch (error) {
+          console.error("Registration error:", error)
+          set({ 
+            error: error.message || "Failed to create account. Please try again.",
+            user: null,
+            isLoading: false 
+          })
+        }
+      },
+      
+      // Logout action
+      logout: async () => {
+        try {
+          set({ isLoading: true, error: null })
+          
+          const { error } = await supabase.auth.signOut()
+          if (error) throw error
+          
+          set({ user: null, isLoading: false })
+        } catch (error) {
+          console.error("Logout error:", error)
+          set({ 
+            error: error.message || "Failed to sign out.", 
+            isLoading: false 
+          })
+        }
+      },
+      
+      // Update profile action
+      updateProfile: async (data) => {
+        try {
+          set({ isLoading: true, error: null })
+          
+          const user = get().user
+          if (!user) throw new Error("User not authenticated")
+          
+          // Update profile in database
+          const { error } = await supabase
+            .from("profiles")
+            .update(data)
+            .eq("id", user.id)
+          
+          if (error) throw error
+          
+          // Update local state
+          set({ 
+            user: { ...user, ...data },
+            isLoading: false 
+          })
+        } catch (error) {
+          console.error("Update profile error:", error)
+          set({ 
+            error: error.message || "Failed to update profile.", 
+            isLoading: false 
+          })
+        }
+      },
+      
+      // Refresh user data
+      refreshUser: async () => {
+        try {
+          set({ isLoading: true, error: null })
+          
+          // Get current authenticated user
+          const authUser = await getCurrentUser()
+          if (!authUser) {
+            set({ user: null, isLoading: false })
+            return
+          }
+          
+          // Get user profile from profiles table
+          const profile = await getUserProfile(authUser.id)
+          
+          if (profile) {
+            set({ 
+              user: {
+                id: authUser.id,
+                ...profile,
+              },
+              isLoading: false 
+            })
+          } else {
+            // User exists but profile is missing
+            set({ 
+              user: {
+                id: authUser.id,
+                role: authUser.user_metadata?.role as UserRole || null,
+                full_name: authUser.user_metadata?.full_name,
+                avatar_url: authUser.user_metadata?.avatar_url,
+              },
+              isLoading: false 
+            })
+          }
+        } catch (error) {
+          console.error("Refresh user error:", error)
+          set({ 
+            error: error.message || "Failed to refresh user data.", 
+            isLoading: false 
+          })
+        }
+      },
+    }),
+    {
+      name: "auth-storage",
+      storage: createJ
