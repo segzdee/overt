@@ -14,6 +14,7 @@ export const demoUpdates: MarketUpdate[] = [
     currency: "EUR",
     original_rate: 30,
     currency_rate: 1,
+    description: "An emergency chef is needed for a high-end restaurant in Berlin."
   },
   {
     id: "102",
@@ -28,6 +29,7 @@ export const demoUpdates: MarketUpdate[] = [
     currency: "EUR",
     original_rate: 25,
     currency_rate: 1,
+    description: "Looking for an experienced waiter for a busy restaurant in Munich."
   },
   {
     id: "103",
@@ -42,6 +44,7 @@ export const demoUpdates: MarketUpdate[] = [
     currency: "EUR",
     original_rate: 22,
     currency_rate: 1,
+    description: "Bartender needed for a shift swap in a popular bar in Hamburg."
   },
   {
     id: "104",
@@ -56,6 +59,7 @@ export const demoUpdates: MarketUpdate[] = [
     currency: "EUR",
     original_rate: 28,
     currency_rate: 1,
+    description: "Urgent need for a dishwasher in a busy restaurant in Cologne."
   },
   {
     id: "105",
@@ -70,6 +74,7 @@ export const demoUpdates: MarketUpdate[] = [
     currency: "EUR",
     original_rate: 26,
     currency_rate: 1,
+    description: "Seeking a hotel receptionist for a luxury hotel in Frankfurt."
   },
   {
     id: "106",
@@ -84,6 +89,7 @@ export const demoUpdates: MarketUpdate[] = [
     currency: "EUR",
     original_rate: 23,
     currency_rate: 1,
+    description: "Kitchen staff needed for a shift swap in a restaurant in Stuttgart."
   },
   {
     id: "107",
@@ -98,6 +104,7 @@ export const demoUpdates: MarketUpdate[] = [
     currency: "EUR",
     original_rate: 32,
     currency_rate: 1,
+    description: "Emergency cleaning staff needed for a large event in Dusseldorf."
   },
   {
     id: "108",
@@ -112,6 +119,7 @@ export const demoUpdates: MarketUpdate[] = [
     currency: "EUR",
     original_rate: 27,
     currency_rate: 1,
+    description: "Restaurant manager needed for a high-end restaurant in Dortmund."
   },
 ]
 
